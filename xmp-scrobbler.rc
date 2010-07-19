@@ -1,0 +1,70 @@
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <commctrl.h>
+#include <richedit.h>
+#include "resource.h"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+IDD_CONFIG DIALOGEX 0, 0, 226, 230
+STYLE DS_MODALFRAME | DS_SHELLFONT | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_POPUP | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Audioscrobbler Configuration"
+FONT 8, "MS Shell Dlg", 0, 0, 1
+{
+   GROUPBOX        "Last.fm Account", -1, 6, 5, 108, 46
+   LTEXT           "Username:", -1, 12, 20, 34, 11, SS_LEFT
+   EDITTEXT        IDC_USERNAME, 48, 18, 62, 13, NOT WS_BORDER | ES_AUTOHSCROLL, WS_EX_CLIENTEDGE
+   LTEXT           "Password:", -1, 12, 35, 34, 9, SS_LEFT, WS_EX_TRANSPARENT
+   EDITTEXT        IDC_PASSWORD, 48, 33, 62, 13, NOT WS_BORDER | ES_AUTOHSCROLL | ES_PASSWORD, WS_EX_CLIENTEDGE
+   GROUPBOX        "Preferences", -1, 116, 5, 104, 46
+   AUTOCHECKBOX    "Enable xmp-scrobbler", IDC_ENABLE, 121, 17, 91, 12
+   AUTOCHECKBOX    "Delay info fetch:", IDC_INFO, 121, 33, 66, 12
+   EDITTEXT        IDC_DELAY, 193, 33, 19, 12, ES_AUTOHSCROLL | ES_NUMBER, WS_EX_RIGHT
+   GROUPBOX        "Proxy server configuration", IDC_GRP1, 6, 55, 214, 83
+   AUTOCHECKBOX    "Use proxy server", IDC_PROXY_ENABLE, 12, 66, 68, 9
+   LTEXT           "Host:", IDC_STC1, 12, 81, 18, 9, NOT WS_GROUP | SS_LEFT
+   EDITTEXT        IDC_PROXY_SERVER, 34, 79, 112, 13, NOT WS_BORDER | ES_AUTOHSCROLL, WS_EX_CLIENTEDGE
+   LTEXT           "Port:", IDC_STC4, 162, 81, 18, 9, NOT WS_GROUP | SS_LEFT
+   EDITTEXT        IDC_PROXY_PORT, 182, 79, 30, 13, NOT WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, WS_EX_CLIENTEDGE
+   AUTOCHECKBOX    "Use proxy server authentication", IDC_PROXY_AUTH, 12, 99, 116, 9
+   LTEXT           "User:", IDC_STC2, 12, 118, 20, 9, NOT WS_GROUP | SS_LEFT
+   EDITTEXT        IDC_PROXY_USER, 34, 116, 64, 13, NOT WS_BORDER, WS_EX_CLIENTEDGE
+   LTEXT           "Password:", IDC_STC3, 110, 118, 32, 9, NOT WS_GROUP | SS_LEFT
+   EDITTEXT        IDC_PROXY_PASSWORD, 148, 116, 64, 13, NOT WS_BORDER | ES_PASSWORD, WS_EX_CLIENTEDGE
+   GROUPBOX        "Log file configuration", IDC_GRP2, 6, 141, 214, 56
+   AUTOCHECKBOX    "Limit log file size to", IDC_LOGFILE_LIMIT, 12, 156, 72, 9
+   COMBOBOX        IDC_LOGFILE_LIMITS, 86, 154, 56, 44, WS_TABSTOP | WS_TABSTOP | CBS_DROPDOWNLIST
+   AUTOCHECKBOX    "Create new log file at each startup", IDC_LOGFILE_TRUNCATE, 12, 169, 136, 9
+   AUTOCHECKBOX    "Enable debug mode", IDC_LOGFILE_DEBUGMODE, 12, 182, 92, 9
+   PUSHBUTTON      "View Log File", IDC_VIEW_LOG, 158, 152, 52, 17
+   PUSHBUTTON      "Clear Log File", IDC_DELETE_LOG, 158, 172, 52, 17
+   DEFPUSHBUTTON   "&Save", IDOK, 56, 206, 56, 17
+   PUSHBUTTON      "&Cancel", IDCANCEL, 116, 206, 52, 17
+}
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+1 VERSIONINFO
+   FILEVERSION     0,9,6,0
+   PRODUCTVERSION  0,9,6,0
+   FILEOS          VOS__WINDOWS32
+   FILETYPE        VFT_DLL
+   FILESUBTYPE     VFT2_UNKNOWN
+   FILEFLAGSMASK   0x00000000
+   FILEFLAGS       0x00000000
+{
+   BLOCK "StringFileInfo"
+   {
+      BLOCK "040904e4"
+      {
+         VALUE "FileDescription", "Last.fm Audioscrobbler plugin for XMPlay, protocol 1.1 compliant."
+         VALUE "FileVersion", "0.9.6\0"
+         VALUE "OriginalFilename", "xmp-scrobbler.dll"
+         VALUE "ProductName", "xmp-scrobbler"
+         VALUE "ProductVersion", "0.9.6\0"
+      }
+   }
+   BLOCK "VarFileInfo"
+   {
+      VALUE "Translation", 0x0409, 0x04E4
+   }
+}
