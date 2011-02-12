@@ -1,0 +1,19 @@
+xmp-scrobbler is a Last.fm submission plugin for XMPlay. Since original developer 'yagood' stoped this project, the new guy called 'Xander' brake into to keep project alive. Still he hasn't done any real innovative features, he fixed long-stayed cache corruption problem. Right before i started xmp-scrobbler++ project that will add some new real innovations, but sources will never be published due my decision, yes it will violates original GPL license, but yep, i'm a law breaker pirate bwahaha.
+
+Current permanent feature realized in xmp-scrobbler++ is radio streams submissions. Next permanent stages will be moving to 1.2+ protocol and adding of some integration with original Last.fm application. I'll provide you with link to binary when work will done.
+
+Though Xander made a bit of good work of fixing some ugly bugs of original xmp-scrobbler, he uploaded sources with applied modifications by him and plus he broke original formatting in some of files instead of just making diffs. If people want to unify code formatting they should use any of code-styling tools like AStyle but not just doing it with their bare hands (sorry for that stupid lecture), since they make bad thing for other coders who just want to see what was done in compare of original tree. My opinion that if you want make modifications to any foreign project you should make a minimum of modifications if they are really required and add more code (sorry for that too). If you made cleanup and styling changes you must release it before doing any modifications to it or in better case contact origin developer, so he commits your cleanup and style-fixing into original tree or archive (final lecture :(, my apologies).
+
+orig
+----
+Dir where original 0.8 sources should be stored.
+
+orig/clean.bat
+--------------
+
+Cleanup batch for 0.8 tree
+
+patches/formatting.txt
+----------------------
+
+Just crap example options for AStyle.
