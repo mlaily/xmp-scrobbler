@@ -1,9 +1,9 @@
 del *.base
 del *.def
 del *.o
-del libscrobbler/*.o
+del libscrobbler\*.o
 del *.res
 del libxmp-scrobbler.a
-del xmp-scrobbler.cpp.bak
 del xmp-scrobbler.layout
-del test.bat
+del xmp-scrobbler_private.*
+del Makefile.win
