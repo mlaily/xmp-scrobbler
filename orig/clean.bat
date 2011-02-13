@@ -5,6 +5,5 @@ del libscrobbler\*.o
 del *.res
 del libxmp-scrobbler.a
 del xmp-scrobbler.layout
-del xmp-scrobbler_private.rc
-del xmp-scrobbler_private.h
+del xmp-scrobbler_private.*
 del Makefile.win
