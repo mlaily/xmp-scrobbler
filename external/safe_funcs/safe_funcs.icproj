@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<VisualStudioProject
+	ProjectType="Intel C++ Project"
+	Version="12.0"
+	Name="safe_funcs"
+	ProjectGUID="{53A00170-24D2-4800-8581-F0D2EF9D5525}"
+	VCNestedProjectGUID="{F4D98B16-C9FE-4D55-92D8-203C718A226F}"
+	VCNestedProjectFileName="safe_funcs.vcproj"
+	>
+	<Configurations/>
+	<Files/>
+</VisualStudioProject>

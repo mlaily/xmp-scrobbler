@@ -43,6 +43,10 @@
 #include "../xmp-scrobbler.h"
 #include "../cachemanager.h"
 
+#ifdef SAFE_FUNCS
+#include "..\..\external\safe_funcs\header.h"
+#endif
+
 #if defined(WIN32)
 #	define THREADCALL DWORD WINAPI
 #   define snprintf _snprintf
@@ -50,7 +54,7 @@
 #	include <unistd.h>
 #	define THREADCALL void *
 #   define Sleep(milliSec)  usleep(milliSec * 1000)
-#   define stricmp strcasecmp
+//#   define stricmp strcasecmp
 // My version of libcurl doesn't have curl_free anymore, I'll have to
 //  add some stuff in autoconf to automate this (properly)
 #   define curl_free free

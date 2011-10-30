@@ -31,6 +31,9 @@ Scrobbler::Scrobbler(const char *user, const char *pass, const char *id, const c
 	setUsername(user);
 	clientid = id; clientver = ver;
 	char buf[64];
+/* There is a bug in MSVC8 
+   http://connect.microsoft.com/VisualStudio/feedback/details/99662/templated-vsnprintf-s-and-snprintf-s-buggy
+   So give up */
 	snprintf(buf, sizeof(buf), "Mozilla/5.0 (compatible; libscrobbler %s; %s %s)", LS_VER, id, ver);
 	useragent = buf;
 	closethread = false;
@@ -113,10 +116,11 @@ void Scrobbler::setPassword(const char *pass)
 	md5_append(&md5state, (unsigned const char *)pass, (int)strlen(pass));
 	md5_finish(&md5state, md5pword);
 	char tmp[33];
-	strncpy(tmp, "\0", sizeof(tmp));
+	/* Note: removed strncpy() */
+	memset(tmp, '\0', sizeof(tmp));
 	for (int j = 0;j < 16;j++) {
 		char a[3];
-		sprintf(a, "%02x", md5pword[j]);
+		snprintf(a, sizeof(a), "%02x", md5pword[j]);
 		tmp[2*j] = a[0];
 		tmp[2*j+1] = a[1];
 	}
@@ -199,10 +203,16 @@ string Scrobbler::prepareSubmitString()
 		TRACKDATA track = current_sp.tracks[count];
 
 		char ti[20];
+
+/* In case of MSVC use security-enhanced functions */
+#if defined(_MSC_VER) && (_MSC_VER >= 1000)
+		struct tm today;
+		gmtime_s(&today, &track.playtime);
+		strftime(ti, sizeof(ti), "%Y-%m-%d %H:%M:%S", &today);
+#else
 		struct tm *today = gmtime(&track.playtime);
-
 		strftime(ti, sizeof(ti), "%Y-%m-%d %H:%M:%S", today);
-
+#endif
 		char *a = curl_escape(track.artist, (int)strlen(track.artist));
 		char *b = curl_escape(track.album, (int)strlen(track.album));
 		char *t = curl_escape(track.title, (int)strlen(track.title));
@@ -210,7 +220,7 @@ string Scrobbler::prepareSubmitString()
 		char *m = curl_escape(track.mb, (int)strlen(track.mb));
 		char *buf = (char *)malloc(48 + strlen(a) + strlen(b) + strlen(t) + strlen(i) + strlen(m));
 
-		sprintf(buf, "&a[%d]=%s&b[%d]=%s&t[%d]=%s&i[%d]=%s&l[%d]=%ld&m[%d]=%s", count, a, count, b, count, t, count, i, count, track.length, count, track.mb);
+		snprintf(buf, sizeof(buf), "&a[%d]=%s&b[%d]=%s&t[%d]=%s&i[%d]=%s&l[%d]=%ld&m[%d]=%s", count, a, count, b, count, t, count, i, count, track.length, count, track.mb);
 
 		submitStr += buf;
 		
@@ -322,7 +332,8 @@ void Scrobbler::handleHandshake(char *handshake)
 	// Doesn't take into account multiple-packet returns (not that I've seen one yet)...
 
   // Ian says: strtok() is not re-entrant, but since it's only being called
-  //  in only one function at a time, it's ok so far. 
+  //  in only one function at a time, it's ok so far.
+	/* Same is true for strsep() */
 
    if(lastRetCode != 200)
    {
@@ -331,42 +342,68 @@ void Scrobbler::handleHandshake(char *handshake)
       return;
    }
 
-	char seps[] = " \n\r";
+	char seps[] = " \n";
+#ifndef SAFE_FUNCS
 	char *response = strtok(handshake, seps);
+#else
+	char *response = strsep(&handshake, seps);
+#endif
+	
 	if (!response) {
 		XMP_Log("[DEBUG] Handshake failed, the server response is invalid.\n");
 		return;
 	}
 	do {
-		if (stricmp("UPTODATE", response) == 0) {
+		if (strncmp("UPTODATE", response, 8) == 0) {
 			XMP_Log("[DEBUG] Handshake response: client up to date.\n");
-		} else if (stricmp("UPDATE", response) == 0) {
+		} else if (strncmp("UPDATE", response, 6) == 0) {
+#ifndef SAFE_FUNCS
 			char *updateurl = strtok(NULL, seps);
+#else
+			char *updateurl = strsep(&handshake, seps);
+#endif
 			if (!updateurl)
 				break;
 			XMP_Log("[WARNING] Please update the plugin at: %s\n", updateurl);
-		} else if (stricmp("BADUSER", response) == 0) {
+		} else if (strncmp("BADUSER", response, 7) == 0) {
 			XMP_Log("[WARNING] At least your username is incorrect, please correct it in the plugin config.\n");
 			return;
 		} else {
 			break;
 		}
+#ifndef SAFE_FUNCS
 		challenge = strtok(NULL, seps);
 		submiturl = strtok(NULL, seps);
-		
+#else
+		challenge = strsep(&handshake, seps);
+		submiturl = strsep(&handshake, seps);
+#endif
+
 		XMP_Log("[DEBUG] Submission URL: %s\n", submiturl.c_str());
 		
+#ifndef SAFE_FUNCS
 		char *inttext = strtok(NULL, seps);
-		if (!inttext || !(stricmp("INTERVAL", inttext) == 0))
+#else
+		char *inttext = strsep(&handshake, seps);
+#endif
+		if (!inttext || !(strncmp("INTERVAL", inttext, 8) == 0))
 			break;
+#ifndef SAFE_FUNCS
 		interval = atoi(strtok(NULL, seps));
+#else
+		interval = atoi(strsep(&handshake, seps));
+#endif
 		XMP_Log("[DEBUG] Submission interval set to %d second%s.\n", interval, !(interval - 1) ? "" : "s");
 		genSessionKey();
 		readytosubmit = true;
 		XMP_Log("[INFO] Successfully connected to the Last.fm server.\n");
 		return;
 	} while (0);
+#ifndef SAFE_FUNCS
 	XMP_Log("[DEBUG] Handshake failed: %s.\n", strtok(NULL, "\n"));
+#else
+	XMP_Log("[DEBUG] Handshake failed: %s.\n", strsep(&handshake, "\n"));
+#endif
 	XMP_Log("[WARNING] The attempt to connect to the Last.fm server failed!\n");
 }
 
@@ -383,37 +420,66 @@ void Scrobbler::handleSubmit(char *data)
    }
 
 	// Doesn't take into account multiple-packet returns (not that I've seen one yet)...
-	char seps[] = " \n\r";
-	char * response = strtok(data, seps);
+	char seps[] = " \n";
+#ifndef SAFE_FUNCS
+	char *response = strtok(data, seps);
+#else
+	char *response = strsep(&data, seps);
+#endif
 	if (!response) {
 		XMP_Log("[DEBUG] Submission failed, the server response is invalid.\n");
 		return;
 	}
-	if (stricmp("OK", response) == 0) {
+	if (strncmp("OK", response, 2) == 0) {
 		XMP_Log("[INFO] Submission succeeded.\n");
 
 		clearCache();
 		cm->DeleteTracks( current_sp.size );
 		cm->Save();
+#ifndef SAFE_FUNCS
 		char *inttext = strtok(NULL, seps);
-		if (inttext && (stricmp("INTERVAL", inttext) == 0)) {
+#else
+		char *inttext = strsep(&data, seps);
+#endif
+		if (inttext && (strncmp("INTERVAL", inttext, 8) == 0)) {
+#ifndef SAFE_FUNCS
 			interval = atoi(strtok(NULL, seps));
+#else
+			interval = atoi(strsep(&data, seps));
+#endif
 			XMP_Log("[DEBUG] Submission interval set to %d second%s.\n", interval, !(interval - 1) ? "" : "s");
 		}
-	} else if (stricmp("BADAUTH", response) == 0) {
+	} else if (strncmp("BADAUTH", response, 7) == 0) {
 		XMP_Log("[DEBUG] Submission failed, the server reported bad authorization.\n");
 		XMP_Log("[WARNING] Your login info is incorrect, please correct it in the plugin config.\n");
+#ifndef SAFE_FUNCS
 		char *inttext = strtok(NULL, seps);
-		if (inttext && (stricmp("INTERVAL", inttext) == 0)) {
+#else
+		char *inttext = strsep(&data, seps);
+#endif
+		if (inttext && (strncmp("INTERVAL", inttext, 8) == 0)) {
+#ifndef SAFE_FUNCS
 			interval = atoi(strtok(NULL, seps));
+#else
+			interval = atoi(strsep(&data, seps));
+#endif
 			XMP_Log("[DEBUG] Submission interval set to %d second%s.\n", interval, !(interval - 1) ? "" : "s");
 		}
 	} else {
 		/* FAILED and BADUSER require interval too */
+#ifndef SAFE_FUNCS
 		XMP_Log("[DEBUG] Submission failed: %s.\n", strtok(NULL, "\n"));
 		char *inttext = strtok(NULL, seps);
-		if (inttext && (stricmp("INTERVAL", inttext) == 0)) {
+#else
+		XMP_Log("[DEBUG] Submission failed: %s.\n", strsep(&data, "\n"));
+		char *inttext = strsep(&data, seps);
+#endif
+		if (inttext && (strncmp("INTERVAL", inttext, 8) == 0)) {
+#ifndef SAFE_FUNCS
 			interval = atoi(strtok(NULL, seps));
+#else
+			interval = atoi(strsep(&data, seps));
+#endif
 			XMP_Log("[DEBUG] Submission interval set to %d second%s.\n", interval, !(interval - 1) ? "" : "s");
 		}		
 	}
@@ -428,10 +494,11 @@ void Scrobbler::genSessionKey() {
 	md5_append(&md5state, (unsigned const char *)clear.c_str(), (int)clear.length());
 	md5_finish(&md5state, md5pword);
 	char key[33];
-	strncpy(key, "\0", sizeof(key));
+	/* Note: removed strncpy() */
+	memset(key, '\0', sizeof(key));
 	for (int j = 0;j < 16;j++) {
 		char a[3];
-		sprintf(a, "%02x", md5pword[j]);
+		snprintf(a, sizeof(a) + 1, "%02x", md5pword[j]);
 		key[2*j] = a[0];
 		key[2*j+1] = a[1];
 	}

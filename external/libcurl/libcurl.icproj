@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Intel C++ Project"
+	Version="12.0"
+	Name="libcurl"
+	ProjectGUID="{C551F43A-4DA3-4771-822A-7A2DF0EAB922}"
+	VCNestedProjectGUID="{87EE9DA4-DE1E-4448-8324-183C98DCA588}"
+	VCNestedProjectFileName="libcurl.vcproj"
+	>
+	<Configurations/>
+	<Files/>
+</VisualStudioProject>

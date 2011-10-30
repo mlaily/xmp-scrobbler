@@ -1,0 +1,19 @@
+Additional paths:
+..\..\external\safe_funcs
+
+libcurl building prepdefs:
+CURL_DISABLE_LDAP
+CURL_STATICLIB
+HAVE_STRLCPY
+additional libdeps:
+ws2_32.lib
+
+project's building prepdefs:
+CURL_STATICLIB
+SAFE_FUNCS
+bypass mangling:
+/EXPORT:DllMain,@1 /EXPORT:XMPDSP_GetInterface2,@2
+
+bugs:
+_snprintf_s realization in MSVC8 has a bad design
+http://connect.microsoft.com/VisualStudio/feedback/details/99662/templated-vsnprintf-s-and-snprintf-s-buggy

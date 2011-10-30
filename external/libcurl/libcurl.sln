@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "libcurl", "libcurl.icproj", "{C551F43A-4DA3-4771-822A-7A2DF0EAB922}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C551F43A-4DA3-4771-822A-7A2DF0EAB922}.Debug|Win32.ActiveCfg = Release|Win32
+		{C551F43A-4DA3-4771-822A-7A2DF0EAB922}.Debug|Win32.Build.0 = Release|Win32
+		{C551F43A-4DA3-4771-822A-7A2DF0EAB922}.Release|Win32.ActiveCfg = Release|Win32
+		{C551F43A-4DA3-4771-822A-7A2DF0EAB922}.Release|Win32.Build.0 = Release|Win32
+		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Release|Win32.Build.0 = Release|Win32
+		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Release|Win32.ActiveCfg = Release|Win32
+		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug|Win32.Build.0 = Release|Win32
+		{87EE9DA4-DE1E-4448-8324-183C98DCA588}.Debug|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

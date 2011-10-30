@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<VisualStudioProject
+	ProjectType="Intel C++ Project"
+	Version="12.0"
+	Name="xmp-scrobbler++"
+	ProjectGUID="{C87E370C-7D6F-4A1E-9CB1-3A3C57CB42C4}"
+	VCNestedProjectGUID="{3BF6DC30-2D67-485B-BB64-F082D11061F1}"
+	VCNestedProjectFileName="xmp-scrobbler++.vcproj"
+	>
+	<Configurations/>
+	<Files/>
+</VisualStudioProject>

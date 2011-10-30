@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 
@@ -191,6 +192,43 @@ void WINAPI DSP_About(HWND win)
 	string msg = "xmp-scrobbler ";
 
 	msg += XMPSCROBBLER_VERSION;
+#ifdef __INTEL_COMPILER && _MSC_VER
+	int i = __INTEL_COMPILER, v_length; char *string;
+	/* Count number of allocation space for __INTEL_COMPILER */
+	while(i != 0) {
+		i /= 10; v_length++;
+	}
+	/* _itoa_s is a sensitive crap '\0' */
+	v_length++;
+try {
+	string = (char *) malloc(v_length * sizeof(char));
+	_itoa_s(__INTEL_COMPILER, string, v_length, 10);
+	msg += "\n\nBuilt with: Intel C++ Compiler ";
+	/* Pull the version part */
+	v_length = strlen(string) - 2;
+	for(i = 0; i < v_length; string++, i++)
+		msg += *string;
+	msg += '.'; msg += *string++; msg += '.'; msg += string;
+	free(string); string = NULL;
+	
+	/* We know exact string length and format. YYYYMMDD + '\n' */
+	string = (char *) malloc(9 * sizeof(char));
+	_itoa_s(__INTEL_COMPILER_BUILD_DATE, string, 9, 10);
+	msg += " [";
+	for(i = 1; i <= 4; i++, string++)
+		msg += *string;
+	msg += '/';
+	for(i = 1; i <= 2; i++, string++) {
+		msg += *string;
+	}
+	msg += '/'; msg += string; msg += "] (ICC).";
+	free(string); string = NULL;
+}
+catch(...) {
+	XMP_Log("[ERROR] Exception in non-critical section.\n");
+}
+#endif
+	msg += "\nInternal libraries: "; msg += curl_version(); msg += ".";
 	msg += "\n\nJoin the social music revolution at Last.fm.\nIt's fun, it's free, it's all about the music.\n\nhttp://www.last.fm/";
 
 	MessageBox( win, msg.c_str(), "xmp-scrobbler", MB_ICONINFORMATION );
@@ -447,18 +485,36 @@ BOOL WINAPI DSP_SetConfig(void *inst, void *config, DWORD size)
 		xmpcfg.on = ((XMPScrobblerOldConfig *) config)->on;
 		xmpcfg.delayFetch = true;
 		xmpcfg.everConfigured = true;
+#ifndef SAFE_FUNCS
 		strcpy(xmpcfg.delayStr, DEFAULT_FETCH_DELAY_STR);
+#else
+		strlcpy(xmpcfg.delayStr, DEFAULT_FETCH_DELAY_STR, sizeof(xmpcfg.delayStr));
+#endif
 		xmpcfg.fetchDelay = DEFAULT_FETCH_DELAY;
 		/* It's better to avoid crazy things... Memory padding may apply.
 		memcpy(&xmpcfg.username, &((XMPScrobblerOldConfig *) config)->username, sizeof(XMPScrobblerOldConfig) - sizeof(BOOL)); */
+#ifndef SAFE_FUNCS
 		strcpy(xmpcfg.username, ((XMPScrobblerOldConfig *) config)->username);
 		strcpy(xmpcfg.password, ((XMPScrobblerOldConfig *) config)->password);
+#else
+		strlcpy(xmpcfg.username, ((XMPScrobblerOldConfig *) config)->username,
+				sizeof(xmpcfg.username));
+		strlcpy(xmpcfg.password, ((XMPScrobblerOldConfig *) config)->password,
+				sizeof(xmpcfg.password));
+#endif
 		xmpcfg.proxy_enabled = ((XMPScrobblerOldConfig *) config)->proxy_enabled;
 		xmpcfg.proxy_auth_enabled = ((XMPScrobblerOldConfig *) config)->proxy_auth_enabled;
+#ifndef SAFE_FUNCS
 		strcpy(xmpcfg.proxy_server, ((XMPScrobblerOldConfig *) config)->proxy_server);
 		strcpy(xmpcfg.proxy_port, ((XMPScrobblerOldConfig *) config)->proxy_port);
 		strcpy(xmpcfg.proxy_user, ((XMPScrobblerOldConfig *) config)->proxy_user);
 		strcpy(xmpcfg.proxy_password, ((XMPScrobblerOldConfig *) config)->proxy_password);
+#else
+		strlcpy(xmpcfg.proxy_server, ((XMPScrobblerOldConfig *) config)->proxy_server, sizeof(xmpcfg.proxy_server));
+		strlcpy(xmpcfg.proxy_port, ((XMPScrobblerOldConfig *) config)->proxy_port, sizeof(xmpcfg.proxy_port));
+		strlcpy(xmpcfg.proxy_user, ((XMPScrobblerOldConfig *) config)->proxy_user, sizeof(xmpcfg.proxy_user));
+		strlcpy(xmpcfg.proxy_password, ((XMPScrobblerOldConfig *) config)->proxy_password, sizeof(xmpcfg.proxy_password));
+#endif
 		xmpcfg.logfile_limit = ((XMPScrobblerOldConfig *) config)->logfile_limit;
 		xmpcfg.logfile_limit_size = ((XMPScrobblerOldConfig *) config)->logfile_limit_size;
 		xmpcfg.logfile_truncate = ((XMPScrobblerOldConfig *) config)->logfile_truncate;
@@ -651,14 +707,14 @@ extern "C" __declspec( dllexport ) XMPDSP *WINAPI XMPDSP_GetInterface2(DWORD fac
 	return &dsp;
 }
 
-extern "C" __declspec( dllexport ) BOOL APIENTRY DllMain(HINSTANCE hDLL, DWORD reason, LPVOID reserved)
+/*BOOL APIENTRY DllMain(HINSTANCE hDLL, DWORD reason, LPVOID reserved)
 {
 	if (reason == DLL_PROCESS_ATTACH) {
 		ghInstance=hDLL;
 		DisableThreadLibraryCalls(ghInstance);
 	}
 	return 1;
-}
+}*/
 
 // ---------------------------------------------------
 // ---------------------------------------------------
@@ -685,19 +741,20 @@ void XMP_Log( const char *s, ... )
 		XMP_ClearLog();
 
 	ofstream logFile(pathLog.c_str(), ios::app);
-	char buf[8000] = {0};
+	char buf[8000];
 	char buft[20] = {0};
 	SYSTEMTIME time;
+	memset(buf, 0, sizeof(buf));
 
 	va_list argList;
 	va_start( argList, s );
 	
 	GetLocalTime(&time);
 	
-	sprintf( buft, "%02d-%02d-%02d %02d:%02d:%02d\t",
-		time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond );
+	snprintf(buft, sizeof(buft) + 1, "%02d-%02d-%02d %02d:%02d:%02d\t",
+		time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond);
 
-	vsprintf( buf, s, argList );
+	vsnprintf(buf, sizeof(buf), s, argList);
 
 	logFile << buft << buf;
 
@@ -879,12 +936,24 @@ void XMP_FetchInfo()
 			y = block.find(" - ", x + 1);
 			temp = block.substr(x + 1, y - x - 1);
 
+/* If MSVC8 and later */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+			temp._Copy_s(xmpFile.tracks[i].artist, sizeof(xmpFile.tracks[i].artist),
+					temp.length());
+#else
 			temp.copy(xmpFile.tracks[i].artist, temp.length());
+#endif
 
 			x = block.find("\n", y + 3);
 			temp = block.substr(y + 3, x - y - 3);
 
+/* If MSVC8 and later */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+			temp._Copy_s(xmpFile.tracks[i].title, sizeof(xmpFile.tracks[i].title),
+					temp.length());
+#else
 			temp.copy(xmpFile.tracks[i].title, temp.length());
+#endif
 			
 			if(i > 0)
 				xmpFile.tracks[i - 1].length = xmpFile.tracks[i].start -
@@ -1129,9 +1198,9 @@ void XMP_Welcome()
 
 	XMP_Log("----\n");
 	XMP_Log("[INFO] Hello, this is xmp-scrobbler %s.\n", XMPSCROBBLER_VERSION);
-	XMP_Log("[DEBUG] System data and plugin configuration:\n\n · Operating System: %d.%d, build %d.\n · Internal libraries: %s\n"
+	XMP_Log("[DEBUG] System data and plugin configuration:\n\n · Operating System: %d.%d, build %d.\n"
 		" · Tag fetching %s %hu seconds.\n · %s%s\n\n", LOBYTE(LOWORD(dwVersion)), HIBYTE(LOWORD(dwVersion)), HIWORD(dwVersion),
-		curl_version(), xmpcfg.delayFetch? "delayed" : "not delayed,", xmpcfg.fetchDelay, xmpcfg.proxy_enabled? "Operating through "
+		xmpcfg.delayFetch? "delayed" : "not delayed,", xmpcfg.fetchDelay, xmpcfg.proxy_enabled? "Operating through "
 		"proxy" : "Not operating through proxy", (xmpcfg.proxy_enabled && xmpcfg.proxy_auth_enabled)? " with authentication." : ".");
 }
 
