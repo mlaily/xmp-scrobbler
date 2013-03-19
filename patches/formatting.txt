@@ -1,2 +1,0 @@
-AStyle.exe -t -u -C -S -K -B -G -N -L -w -Y -U -x -y -e -k3 -r *.cpp
-AStyle.exe -t -u -C -S -K -B -G -N -L -w -Y -U -x -y -e -k3 -r *.h

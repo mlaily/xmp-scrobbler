@@ -1,3 +1,3 @@
 I started xmp-scrobbler++ project in order to add some new real innovations to XMPlay's scrobbler. Current permanent feature realized in xmp-scrobbler++ is radio streams submissions.
 
-You may download it [[http://www.un4seen.com/forum/?topic=5398.msg85390#msg85390|here]].
+You may download it [here](http://www.un4seen.com/forum/?topic=5398.msg85390#msg85390).
