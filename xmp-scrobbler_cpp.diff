@@ -34,7 +34,7 @@
 +bool XMP_RadioNewTrack_flag = false;
 +unsigned int XMP_RadioTrackLength = 0;
 +/* Don't want to lose it */
-+HANDLE WatchdogThread;
++
 +bool WatchdogCreated = false;
 +
  bool isWinNT = false;   // TRUE if running on WinNT with Unicode
@@ -341,7 +341,7 @@
 +            
 +           /* Create one instance of watchdog thread */
 +           if(!WatchdogCreated)
-+              WatchdogThread = CreateThread(NULL, 0, XMP_RadioWatchdog, NULL, 0, NULL);
++              CreateThread(NULL, 0, XMP_RadioWatchdog, NULL, 0, NULL);
 +        }
  
 -		if(cue_track.tags_ok)
