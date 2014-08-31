@@ -13,6 +13,8 @@ bool XMP_ExtractTags_ID3v2(const char *data, char *artist, char *title, char *al
 
 bool XMP_ExtractTags_WMA(const char *data, char *artist, char *title, char *album);
 bool XMP_ExtractTags_Other(const char *data, char *artist, char *title, char *album);
+/* Internet radio scrobbling */
+bool XMP_ExtractTags_NetRadio(const char *data, char *artist, char *title, char *album);
 bool XMP_ExtractTags_MBID(const char *data, char *mb);
 
 #endif
